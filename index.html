@@ -839,22 +839,24 @@
     }
 
     async function fetchOpenAIResponse(userMessage, matchProfile, chatHistory) {
-      // ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЙ ПРОКСИ-СЕРВЕР (без проблем с CORS!)
-      const PROXY_URL = 'https://css-dating-bot-openaiapikey.up.railway.app/api/chat';
+      /async function fetchOpenAIResponse(userMessage, matchProfile, chatHistory) {
+  // ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЙ ПРОКСИ-СЕРВЕР (без проблем с CORS!)
+  const PROXY_URL = 'https://api.allorigins.win/get?url=' + 
+    encodeURIComponent('https://css-dating-bot-openaiapikey.up.railway.app/api/chat');
 
-      try {
-        // Определяем язык для ответа
-        const currentLang = lang === 'kz' ? 'казахском' : 'русском';
-        const languageInstruction = lang === 'kz' 
-          ? 'Жауапты ТӘЕК казақ тілінде беріңіз. Қазақша жазыңыз!' 
-          : 'Отвечай ТОЛЬКО на русском языке!';
+  try {
+    // Определяем язык для ответа
+    const currentLang = lang === 'kz' ? 'казахском' : 'русском';
+    const languageInstruction = lang === 'kz' 
+      ? 'Жауапты ТӘЕК казақ тілінде беріңіз. Қазақша жазыңыз!' 
+      : 'Отвечай ТОЛЬКО на русском языке!';
+    
+    // Формируем контекст из истории чата
+    const messages = [
+      { 
+        role: "system", 
+        content: `Ты ${matchProfile.name}, ${matchProfile.age} лет из ${matchProfile.city}. ${languageInstruction}
         
-        // Формируем контекст из истории чата
-        const messages = [
-          { 
-            role: "system", 
-            content: `Ты ${matchProfile.name}, ${matchProfile.age} лет из ${matchProfile.city}. ${languageInstruction}
-            
 Твоя биография: ${matchProfile.bio || 'Обычный человек, люблю общаться'}
 
 Твои интересы: ${(matchProfile.interests || []).join(', ')}
@@ -862,19 +864,44 @@
 Веди непринужденную беседу в стиле знакомства через приложение для свиданий. Будь дружелюбным, интересным и кокетливым. Используй эмодзи умеренно. Задавай встречные вопросы, чтобы поддерживать диалог.
 
 ВАЖНО: Отвечай на ${currentLang} языке!`
-          }
-        ];
+      }
+    ];
 
-        // Добавляем историю чата для контекста (последние 10 сообщений)
-        if (chatHistory && chatHistory.length > 0) {
-          const recentHistory = chatHistory.slice(-10);
-          recentHistory.forEach(msg => {
-            messages.push({
-              role: msg.me ? "user" : "assistant",
-              content: msg.text
-            });
-          });
-        }
+    // Добавляем историю чата для контекста (последние 10 сообщений)
+    if (chatHistory && chatHistory.length > 0) {
+      const recentHistory = chatHistory.slice(-10);
+      recentHistory.forEach(msg => {
+        messages.push({
+          role: msg.me ? "user" : "assistant",
+          content: msg.text
+        });
+      });
+    }
+
+    // Добавляем сообщение пользователя
+    messages.push({ role: "user", content: userMessage });
+
+    const proxyResponse = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: messages,
+        model: 'gpt-3.5-turbo',
+        temperature: 0.8,
+        max_tokens: 150
+      })
+    });
+
+    const proxyData = await proxyResponse.json();
+    const data = JSON.parse(proxyData.contents);
+
+    return data.choices[0].message.content;
+
+  } catch (error) {
+    console.error('AI Error:', error);
+    return getFallbackReply(userMessage);
+  }
+}
 
         // Добавляем текущее сообщение пользователя
         messages.push({ role: "user", content: userMessage });
