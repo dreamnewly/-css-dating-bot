@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ff4757" />
+  <title>EvilCorp: Dating App (AI Integrated)</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================
+       CSS STYLES (Остались без изменений)
+       ========================================================== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-main);
+      overflow-x: hidden;
+      transition: background .35s ease, color .25s ease;
+    }
+    button, input, select, textarea { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+
+    :root {
+      --primary: #FF4757;
+      --primary-hover: #ff6b81;
+      --secondary: #5352ed;
+      --accent: #2ed573;
+      --warning: #ffa502;
+      --bg-body: #f2f4fb;
+      --bg-card: #ffffff;
+      --bg-glass: rgba(255,255,255,.78);
+      --bg-input: #f7f9ff;
+      --text-main: #1f2330;
+      --text-sub: #6c7486;
+      --text-light: #a4adbd;
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --shadow-sm: 0 4px 10px rgba(0,0,0,.06);
+      --shadow-md: 0 10px 24px rgba(0,0,0,.08);
+      --shadow-lg: 0 24px 60px rgba(0,0,0,.12);
+      --backdrop: blur(18px);
+      --ease: cubic-bezier(.2,.9,.2,1);
+      --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --gradient-primary: linear-gradient(135deg, #FF4757 0%, #ff6b81 100%);
+    }
+
+    [data-theme="dark"] {
+      --bg-body: #0f111a;
+      --bg-card: #1b1f2c;
+      --bg-glass: rgba(27,31,44,.78);
+      --bg-input: #2a2f42;
+      --text-main: #ffffff;
+      --text-sub: #a9b2c6;
+      --text-light: #65708b;
+      --shadow-sm: 0 4px 10px rgba(0,0,0,.35);
+      --shadow-md: 0 10px 24px rgba(0,0,0,.45);
+      --shadow-lg: 0 24px 60px rgba(0,0,0,.55);
+    }
+
+    body::before, body::after {
+      content: "";
+      position: fixed;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .18;
+      z-index: -1;
+      animation: floatBg 18s ease-in-out infinite alternate;
+    }
+    body::before { background: var(--primary); top: -12%; left: -12%; }
+    body::after { background: var(--secondary); bottom: -12%; right: -12%; animation-delay: -8s; }
+
+    @keyframes floatBg {
+      0% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(40px,-30px) scale(1.06); }
+      100% { transform: translate(-30px,25px) scale(1); }
+    }
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(18px) scale(.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(.6); opacity: 0; }
+      70% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(255,71,87,.4); }
+      70% { box-shadow: 0 0 0 16px rgba(255,71,87,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,71,87,0); }
+    }
+    
+    @keyframes logoFloat { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    @keyframes logoGlow { 0%, 100% { filter: drop-shadow(0 0 5px rgba(255,71,87,0.2)); } 50% { filter: drop-shadow(0 0 12px rgba(255,71,87,0.5)); } }
+
+    .container {
+      max-width: 1320px; margin: 0 auto; padding: 18px; min-height: 100vh;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    header {
+      position: sticky; top: 12px; z-index: 50;
+      background: var(--bg-glass); border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+      padding: 14px 16px; animation: slideUpFade .7s var(--ease);
+    }
+
+    .logo img {
+      animation: logoFloat 3s ease-in-out infinite, logoGlow 3s ease-in-out infinite;
+    }
+
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 20px; cursor: pointer; user-select: none; }
+    .logo span { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; background: var(--gradient-primary); color: #fff; box-shadow: 0 10px 25px rgba(255,71,87,.25); }
+    
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; background: var(--bg-input); border: 1px solid rgba(0,0,0,.05); color: var(--text-main); box-shadow: var(--shadow-sm); transition: .25s; }
+    [data-theme="dark"] .pill { border-color: rgba(255,255,255,.06); }
+    .pill:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+    .icon-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; background: var(--bg-input); box-shadow: var(--shadow-sm); transition: transform .25s var(--ease-elastic); }
+    .icon-btn:hover { transform: rotate(8deg) scale(1.08); }
+    .theme-toggle::after { content: "🌙"; font-size: 18px; }
+    [data-theme="dark"] .theme-toggle::after { content: "☀️"; }
+    .lang-toggle::after { content: "KZ"; font-weight: 900; }
+    [data-lang="kz"] .lang-toggle::after { content: "RU"; }
+
+    nav { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+    .nav-btn { position: relative; border: none; cursor: pointer; padding: 10px 14px; border-radius: 999px; background: transparent; color: var(--text-sub); font-weight: 700; transition: .25s; }
+    .nav-btn:hover { background: rgba(255,71,87,.08); color: var(--primary); transform: translateY(-2px); }
+    .nav-btn.active { background: var(--text-main); color: var(--bg-card); box-shadow: 0 10px 20px rgba(0,0,0,.10); }
+    [data-theme="dark"] .nav-btn.active { background: #fff; color: #000; }
+    .badge { position: absolute; top: -6px; right: -4px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--primary); color: #fff; font-size: 11px; font-weight: 900; border: 2px solid var(--bg-card); animation: popIn .4s var(--ease-elastic); }
+
+    .main { display: grid; grid-template-columns: 320px 1fr 320px; gap: 16px; align-items: start; flex: 1; }
+    .card { background: var(--bg-glass); border: 1px solid rgba(255,255,255,.10); backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px; animation: slideUpFade .6s var(--ease); }
+    .card-title { font-size: 12px; text-transform: uppercase; letter-spacing: .14em; font-weight: 900; color: var(--text-sub); margin-bottom: 12px; }
+    .stat-grid { display: grid; gap: 10px; }
+    .stat { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid rgba(0,0,0,.05); transition: .25s; }
+    [data-theme="dark"] .stat { border-color: rgba(255,255,255,.06); }
+    .stat:hover { transform: translateX(4px); }
+    .stat span:first-child { color: var(--text-sub); font-weight: 700; font-size: 13px; }
+    .stat span:last-child { font-weight: 900; }
+
+    .section { display: none; }
+    .section.active { display: block; animation: slideUpFade .5s var(--ease); }
+
+    .browse-toolbar { display: flex; gap: 10px; margin-bottom: 12px; }
+    .input { width: 100%; padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid rgba(0,0,0,.08); background: var(--bg-card); color: var(--text-main); outline: none; transition: .2s; font-family: inherit; }
+    [data-theme="dark"] .input { border-color: rgba(255,255,255,.08); }
+    .input:focus { border-color: rgba(255,71,87,.45); box-shadow: 0 0 0 4px rgba(255,71,87,.15); }
+
+    .btn { border: none; cursor: pointer; border-radius: var(--radius-md); padding: 12px 16px; font-weight: 900; transition: transform .2s var(--ease-elastic), filter .2s; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--text-main); color: var(--bg-card); }
+    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-2px); }
+    .btn-ghost { background: rgba(255,71,87,.10); color: var(--primary); }
+    .btn-ghost:hover { transform: translateY(-2px); filter: brightness(1.02); }
+
+    .profile-card { background: var(--bg-card); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); overflow: hidden; height: min(72vh, 680px); position: relative; }
+    .photo { height: 100%; background: #eee; position: relative; overflow: hidden; display: grid; place-items: center; transition: filter .3s; background-size: cover; background-position: center; }
+    .photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.15), transparent); pointer-events: none; }
+    .photo-emoji { font-size: 110px; z-index: 2; filter: drop-shadow(0 10px 30px rgba(0,0,0,.25)); transform: translateY(-10px); }
+    .photo-nav { position: absolute; inset: 0; display: flex; z-index: 4; }
+    .photo-nav button { flex: 1; border: none; background: transparent; cursor: pointer; color: transparent; }
+    .photo-dots { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 92%; display: flex; gap: 6px; z-index: 5; }
+    .dot { height: 4px; flex: 1; border-radius: 99px; background: rgba(255,255,255,.25); transition: .2s; }
+    .dot.active { background: rgba(255,255,255,.92); transform: scaleY(1.6); }
+
+    .badge-top { position: absolute; z-index: 6; top: 14px; padding: 7px 12px; border-radius: 999px; font-weight: 900; font-size: 12px; backdrop-filter: blur(10px); color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,.15); }
+    .badge-ai { right: 14px; background: rgba(46, 213, 115, .92); }
+    .badge-verified { left: 14px; background: rgba(55,66,250,.92); }
+    .badge-online { left: 14px; top: 54px; background: rgba(46, 213, 115, .92); }
+
+    .profile-info { position: absolute; left: 0; bottom: 0; width: 100%; padding: 22px 22px 110px 22px; color: #fff; z-index: 6; }
+    .p-name { font-size: 30px; font-weight: 900; margin: 0 0 4px; }
+    .p-meta { font-weight: 800; opacity: .92; margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .p-bio { opacity: .9; margin: 0 0 12px; line-height: 1.5; max-width: 95%; }
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag { border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.16); padding: 6px 12px; border-radius: 999px; font-weight: 800; font-size: 13px; transition: .2s; }
+    
+    .actions { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; z-index: 8; pointer-events: auto; }
+    .fab { width: 54px; height: 54px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-items: center; font-size: 22px; box-shadow: 0 14px 28px rgba(0,0,0,.18); transition: transform .25s var(--ease-elastic); }
+    .fab:hover { transform: translateY(-6px) scale(1.08); }
+    .fab-like { width: 74px; height: 74px; background: var(--gradient-primary); color: #fff; animation: pulseGlow 2.2s infinite; }
+    .fab-skip { background: #fff; color: #3b4356; }
+    .fab-super { background: #fff; color: var(--warning); }
+    .fab-gift { background: #fff; color: var(--secondary); }
+
+    .match { background: var(--bg-card); border-radius: var(--radius-md); padding: 12px; border: 1px solid rgba(0,0,0,.05); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: .25s; margin-bottom: 10px;}
+    [data-theme="dark"] .match { border-color: rgba(255,255,255,.06); }
+    .match:hover { transform: translateY(-3px) scale(1.01); box-shadow: var(--shadow-md); }
+    .avatar { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; background: #eee; flex: 0 0 auto; background-size: cover; background-position: center; position: relative; }
+    
+    .online-dot { position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; background: #2ed573; border: 2px solid var(--bg-card); border-radius: 50%; z-index: 2; }
+
+    .match-info { flex: 1; min-width: 0; }
+    .match-name { font-weight: 900; margin: 0; }
+    .match-sub { color: var(--text-sub); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .compat { font-weight: 900; font-size: 12px; padding: 6px 10px; border-radius: 999px; background: rgba(46,213,115,.12); color: var(--accent); border: 1px solid rgba(46,213,115,.25); }
+
+    .gifts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .gift { background: var(--bg-card); border: 1px solid rgba(0,0,0,.05); border-radius: var(--radius-lg); padding: 16px; text-align: center; cursor: pointer; transition: .25s; }
+    [data-theme="dark"] .gift { border-color: rgba(255,255,255,.06); }
+    .gift:hover { transform: translateY(-8px); box-shadow: var(--shadow-md); border-color: rgba(255,71,87,.35); }
+    .gift-emoji { font-size: 46px; display: block; margin-bottom: 8px; transition: transform .25s var(--ease-elastic); }
+    .gift:hover .gift-emoji { transform: rotate(10deg) scale(1.12); }
+    .gift-name { font-weight: 900; margin: 0 0 4px; }
+    .gift-cost { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-weight: 900; font-size: 12px; background: rgba(255,165,2,.12); color: var(--warning); border: 1px solid rgba(255,165,2,.25); }
+
+    .profile-box { max-width: 720px; margin: 0 auto; background: var(--bg-glass); border: 1px solid rgba(255,255,255,.10); border-radius: var(--radius-xl); padding: 18px; box-shadow: var(--shadow-md); backdrop-filter: var(--backdrop); -webkit-backdrop-filter: var(--backdrop); }
+    .profile-hero { display: grid; gap: 14px; place-items: center; padding: 16px 10px; text-align: center; }
+    .big-avatar { width: 120px; height: 120px; border-radius: 50%; background: var(--gradient-primary); color: #fff; display: grid; place-items: center; font-size: 56px; background-size: cover; background-position: center; position: relative; }
+    .photo-upload-box { width: 100%; height: 120px; border: 2px dashed rgba(0,0,0,0.15); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: .2s; color: var(--text-sub); background: rgba(0,0,0,0.02); margin-bottom: 8px; overflow: hidden; position: relative; }
+    [data-theme="dark"] .photo-upload-box { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.02); }
+    .photo-upload-box:hover { border-color: var(--primary); color: var(--primary); background: rgba(255,71,87,0.05); }
+    .photo-upload-preview { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .interests-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .interest-tag { padding: 8px 14px; border-radius: 999px; background: var(--bg-input); border: 1px solid rgba(0,0,0,.08); font-size: 13px; font-weight: 700; cursor: pointer; transition: .2s; user-select: none; }
+    [data-theme="dark"] .interest-tag { border-color: rgba(255,255,255,.1); }
+    .interest-tag:hover { transform: translateY(-2px); }
+    .interest-tag.selected { background: var(--text-main); color: var(--bg-card); border-color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+    .form { display: grid; gap: 12px; text-align: left; margin-top: 10px; }
+    .field { display: grid; gap: 6px; }
+    .label { font-weight: 900; font-size: 13px; color: var(--text-sub); }
+    .mini-list { display: grid; gap: 10px; }
+    .mini { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid rgba(0,0,0,.05); transition: .25s; cursor: pointer; }
+    [data-theme="dark"] .mini { border-color: rgba(255,255,255,.06); }
+    .mini:hover { transform: translateX(4px); }
+    .mini .avatar { width: 44px; height: 44px; font-size: 20px; }
+
+    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(0,0,0,.62); backdrop-filter: blur(10px); z-index: 1000; }
+    .modal.active { display: flex; }
+    .modal-content { width: 100%; max-width: 560px; max-height: 88vh; overflow: auto; background: var(--bg-card); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); border: 1px solid rgba(0,0,0,.06); animation: popIn .35s var(--ease-elastic); position: relative; }
+    .modal-head { padding: 16px 16px 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .modal-close { width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; background: rgba(0,0,0,.08); transition: .2s; }
+    .modal-close:hover { transform: rotate(90deg); background: var(--primary); color: #fff; }
+    .modal-body { padding: 16px; }
+
+    .chat { height: 520px; display: flex; flex-direction: column; gap: 12px; }
+    .chat-log { flex: 1; overflow: auto; background: var(--bg-input); border-radius: var(--radius-lg); padding: 12px; display: flex; flex-direction: column; gap: 10px; border: 1px solid rgba(0,0,0,.06); }
+    [data-theme="dark"] .chat-log { border-color: rgba(255,255,255,.06); }
+    .msg { max-width: 78%; padding: 10px 12px; border-radius: 18px; font-size: 14px; line-height: 1.4; animation: slideUpFade .25s var(--ease); }
+    .msg.me { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 6px; }
+    .msg.other { align-self: flex-start; background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 6px; box-shadow: var(--shadow-sm); }
+    .chat-input { display: flex; gap: 10px; align-items: center; }
+    .send { width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; background: var(--primary); color: #fff; font-size: 18px; transition: transform .2s var(--ease-elastic); }
+    .send:hover { transform: rotate(-12deg) scale(1.06); }
+    .typing-indicator { font-size: 12px; color: var(--text-sub); margin-left: 12px; font-style: italic; display: none; }
+
+    .toast { position: fixed; left: 50%; top: 18px; transform: translateX(-50%) translateY(-120px); background: var(--text-main); color: var(--bg-card); border-radius: 999px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; box-shadow: 0 18px 60px rgba(0,0,0,.22); z-index: 2000; transition: transform .35s var(--ease-elastic); font-weight: 800; max-width: min(92vw, 720px); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .rt-bell { position: fixed; right: 16px; bottom: 16px; z-index: 2100; display: grid; gap: 10px; justify-items: end; pointer-events: none; }
+    .rt-card { pointer-events: auto; width: min(360px, 92vw); background: var(--bg-card); border: 1px solid rgba(0,0,0,.06); border-radius: 18px; box-shadow: var(--shadow-lg); padding: 12px; display: grid; gap: 8px; animation: popIn .35s var(--ease-elastic); }
+    .rt-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .rt-title { font-weight: 900; }
+    .rt-sub { font-size: 13px; color: var(--text-sub); }
+    .rt-actions { display: flex; gap: 10px; }
+
+    /* Animation Styles */
+    .gift-anim-container { position: fixed; inset: 0; pointer-events: none; z-index: 5000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .gift-anim-main { font-size: 120px; animation: popInMain 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); filter: drop-shadow(0 20px 50px rgba(0,0,0,0.3)); z-index: 5002; }
+    @keyframes popInMain { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+    .gift-particle { position: absolute; font-size: 24px; left: 50%; top: 50%; animation: particleFly 1.5s ease-out forwards; opacity: 0; }
+    @keyframes particleFly { 0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.5); opacity: 1; } 100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--tr)) scale(0); opacity: 0; } }
+    .gift-specific-item { position: absolute; left: 50%; top: 50%; font-size: 28px; animation: floatGiftItem 1.8s ease-out forwards; opacity: 0; z-index: 5001; }
+    @keyframes floatGiftItem { 0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.5) rotate(var(--r)); opacity: 0; } }
+    .gift-heart { position: absolute; font-size: 20px; color: #ff4757; left: 50%; top: 50%; animation: heartFloat 2s ease-out forwards; }
+    @keyframes heartFloat { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { transform: translate(calc(-50% + var(--hx)), calc(-50% + var(--hy))) rotate(var(--hr)) scale(0); opacity: 0; } }
+    .gift-star { position: absolute; left: 50%; top: 50%; font-size: 32px; color: #ffa502; animation: starPop 0.8s ease-out forwards; }
+    @keyframes starPop { 0% { transform: translate(-50%, -50%) scale(0); opacity: 0; } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); } 100% { transform: translate(-50%, -50%) scale(0); opacity: 0; } }
+    .gift-ring { position: absolute; left: 50%; top: 50%; width: 100px; height: 100px; border-radius: 50%; border: 4px solid transparent; transform: translate(-50%, -50%); animation: ringExpand 1s ease-out forwards; }
+    @keyframes ringExpand { 0% { width: 0; height: 0; opacity: 1; border-width: 8px; } 100% { width: 400px; height: 400px; opacity: 0; border-width: 0; } }
+
+    @media (max-width: 1080px) { .main { grid-template-columns: 320px 1fr; } .right { display: none; } }
+    @media (max-width: 820px) { header { top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); } .container { padding: 0; } .main { grid-template-columns: 1fr; padding: 12px; } .left { order: 2; } .center { order: 1; } .right { display: none; } .profile-card { height: 66vh; } nav { gap: 6px; } }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <div class="logo" onclick="showSection('browse')" title="EvilCorp">
+          <span style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <img src="https://raw.githubusercontent.com/dreamnewly/dating-bot-photos-demo/a7bf33ed9e543381474d76dbe99208099c7a9dfd/image.png" alt="Logo" width="45" height="45">
+          </span>
+          <div>
+            <div style="font-size:18px; line-height:1;">Evil<b>Corp</b></div>
+            <div style="font-size:12px; font-weight:800; color:var(--text-sub);">AI Powered • Smart Chat</div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="pill">⭐ <span id="starBalance">0</span></div>
+          <div class="pill">💘 <span id="matchCount">0</span></div>
+          <button class="icon-btn theme-toggle" onclick="toggleTheme()"></button>
+          <button class="icon-btn lang-toggle" onclick="toggleLang()"></button>
+        </div>
+      </div>
+
+      <nav>
+        <button class="nav-btn active" data-section="browse" onclick="showSection('browse')">🔍 <span data-i18n="nav_search">Іздеу</span></button>
+        <button class="nav-btn" data-section="matches" onclick="showSection('matches')">
+          💬 <span data-i18n="nav_chats">Чаттар</span>
+          <span class="badge" id="unreadBadge" style="display:none;">0</span>
+        </button>
+        <button class="nav-btn" data-section="gifts" onclick="showSection('gifts')">🎁 <span data-i18n="nav_gifts">Сыйлықтар</span></button>
+        <button class="nav-btn" data-section="profile" onclick="showSection('profile')">👤 <span data-i18n="nav_profile">Профиль</span></button>
+      </nav>
+    </header>
+
+    <div class="main">
+      <aside class="card left">
+        <div class="card-title" data-i18n="stats">Статистика</div>
+        <div class="stat-grid">
+          <div class="stat"><span data-i18n="views">Көрулер</span><span id="views">0</span></div>
+          <div class="stat"><span data-i18n="likes">Ұнатқандар</span><span id="likes">0</span></div>
+          <div class="stat"><span data-i18n="ai">AI Score</span><span id="aiScoreSmall" style="color:var(--accent)">--</span></div>
+          <div class="stat"><span data-i18n="verified">Верификация</span><span id="verifiedSmall">—</span></div>
+        </div>
+        <div style="height:14px"></div>
+        <button class="btn btn-ghost" onclick="simulateRealtimeMatch()" style="width:100%;">
+          ⚡ <span data-i18n="simulate">Симуляция матча</span>
+        </button>
+      </aside>
+
+      <main class="center">
+        <section class="section active" id="browse">
+          <div class="browse-toolbar">
+            <select class="input" id="citySelect">
+              <option value="" data-i18n="all_cities">Барлық қалалар</option>
+              <option value="Алматы">Алматы</option>
+              <option value="Астана">Астана</option>
+              <option value="Шымкент">Шымкент</option>
+              <option value="Караганды">Караганды</option>
+              <option value="Атырау">Атырау</option>
+              <option value="Ақтау">Ақтау</option>
+            </select>
+            <button class="btn btn-primary" onclick="filterByCity()">Go</button>
+          </div>
+
+          <div class="profile-card" id="profileCard">
+            <div class="photo" id="photo">
+              <div class="photo-dots" id="photoDots"></div>
+              <div class="badge-top badge-ai">🤖 <span id="aiScore">--</span>%</div>
+              <div class="badge-top badge-verified" id="verifiedBadge" style="display:none;">✓ Verified</div>
+              <div class="badge-top badge-online" id="onlineBadge" style="display:none;">● Online</div>
+              <div class="photo-emoji" id="photoEmoji">👤</div>
+
+              <div class="photo-nav">
+                <button onclick="prevPhoto()"></button>
+                <button onclick="nextPhoto()"></button>
+              </div>
+
+              <div class="profile-info">
+                <h2 class="p-name" id="pName">Loading…</h2>
+                <div class="p-meta" id="pMeta">…</div>
+                <p class="p-bio" id="pBio">…</p>
+                <div class="tags" id="pTags"></div>
+              </div>
+
+              <div class="actions">
+                <button class="fab fab-skip" onclick="skip()">✕</button>
+                <button class="fab fab-super" onclick="superLike()">⭐</button>
+                <button class="fab fab-like" onclick="like()">❤️</button>
+                <button class="fab fab-gift" onclick="openGiftModal()">🎁</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="matches">
+          <div class="card" style="background:transparent; border:none; box-shadow:none; padding:0;">
+            <div class="card-title" style="font-size:14px;" data-i18n="your_matches">Ваши матчи</div>
+            <div class="list" id="matchesList"></div>
+          </div>
+        </section>
+
+        <section class="section" id="gifts">
+          <div class="card" style="background:transparent; border:none; box-shadow:none; padding:0;">
+            <div class="card-title" style="font-size:14px;" data-i18n="gift_shop">Магазин подарков</div>
+            <div class="gifts-grid" id="giftsGrid"></div>
+          </div>
+        </section>
+
+        <section class="section" id="profile">
+          <div class="profile-box">
+            <div class="profile-hero">
+              <div class="big-avatar" id="meAvatar">👤</div>
+              <div>
+                <div style="font-weight:900; font-size:18px;" id="meName">User</div>
+                <div style="color:var(--text-sub); font-weight:800;" id="meCity">—</div>
+              </div>
+            </div>
+
+            <form class="form" id="profileForm" novalidate>
+              <div class="field">
+                <div class="label" data-i18n="upload_photo">Загрузить фото</div>
+                <label class="photo-upload-box">
+                  <span style="font-size:24px; margin-bottom:4px;">📷</span>
+                  <span style="font-size:12px; font-weight:700;" data-i18n="photo_hint">Нажмите для выбора</span>
+                  <input type="file" id="inpFile" accept="image/*" hidden onchange="handleFileSelect(event)">
+                  <div class="photo-upload-preview" id="photoPreview" style="display:none;"></div>
+                </label>
+              </div>
+
+              <div class="field">
+                <div class="label" data-i18n="your_name">Ваше имя</div>
+                <input class="input" id="inpName" type="text" placeholder="Aruzhan" required minlength="2" />
+              </div>
+              <div class="field">
+                <div class="label" data-i18n="your_city">Ваш город</div>
+                <select class="input" id="inpCity" required>
+                  <option value="" data-i18n="choose_city">Выберите город</option>
+                  <option value="Алматы">Алматы</option>
+                  <option value="Астана">Астана</option>
+                  <option value="Шымкент">Шымкент</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="label" data-i18n="interests_label">Интересы</div>
+                <div class="interests-grid" id="interestContainer"></div>
+              </div>
+              
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                <button class="btn btn-primary" type="submit">💾 <span data-i18n="save">Сохранить</span></button>
+                <button class="btn btn-ghost" type="button" onclick="verifyProfile()">📸 <span data-i18n="verify">Верификация</span></button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+
+      <aside class="card right">
+        <div class="card-title" data-i18n="online">Онлайн сейчас</div>
+        <div class="mini-list" id="onlineList"></div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="modal" id="giftModal" onclick="modalBackdropClose(event, 'giftModal')">
+    <div class="modal-content">
+      <div class="modal-head">
+        <div style="font-weight:900;" data-i18n="choose_gift">🎁 Выберите подарок</div>
+        <button class="modal-close" onclick="closeModal('giftModal')">✕</button>
+      </div>
+      <div class="modal-body"><div class="gifts-grid" id="giftModalGrid"></div></div>
+    </div>
+  </div>
+
+  <div class="modal" id="chatModal" onclick="modalBackdropClose(event, 'chatModal')">
+    <div class="modal-content">
+      <div class="modal-head">
+        <div>
+          <div style="font-weight:900;" id="chatTitle">💬 Чат</div>
+          <div style="font-size:12px; color:var(--text-sub); font-weight:800;" id="chatSubtitle">—</div>
+        </div>
+        <button class="modal-close" onclick="closeModal('chatModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="chat">
+          <div class="chat-log" id="chatLog"></div>
+          <span id="typingIndicator" class="typing-indicator">... печатает</span>
+          <div class="chat-input">
+            <input class="input" id="chatInput" type="text" placeholder="Сообщение…" />
+            <button class="send" onclick="sendMessage()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span id="toastIcon">✨</span>
+    <span id="toastText">—</span>
+  </div>
+
+  <div class="rt-bell" id="rtBell"></div>
+
+  <script>
+    // ==========================================================
+    // JS LOGIC
+    // ==========================================================
+
+    // ✅ API ключ теперь НА СЕРВЕРЕ (server.js), а не в браузере!
+    // Это безопаснее - ключ не виден пользователям 
+
+    const i18n = {
+      ru: {
+        nav_search: 'Поиск', nav_chats: 'Чаты', nav_gifts: 'Подарки', nav_profile: 'Профиль',
+        stats: 'Статистика', views: 'Просмотры', likes: 'Лайки', ai: 'AI Score', verified: 'Верификация',
+        realtime: 'Real-time', simulate: 'Симуляция матча', all_cities: 'Все города',
+        your_matches: 'Ваши матчи', gift_shop: 'Магазин подарков', online: 'Онлайн сейчас',
+        your_name: 'Ваше имя', your_city: 'Ваш город', choose_city: 'Выберите город',
+        interests_label: 'Интересы', upload_photo: 'Загрузить фото', photo_hint: 'Нажмите для выбора',
+        save: 'Сохранить', verify: 'Верификация профиля', choose_gift: 'Выберите подарок',
+        toast_saved: 'Профиль сохранён', toast_verified: 'Профиль верифицирован ✓',
+        toast_like: 'Лайк отправлен ❤️', toast_skip: 'Пропуск', toast_super: 'Суперлайк ⭐',
+        toast_gift: 'Подарок отправлен 🎁', toast_match: 'Новый матч! 💘',
+        chat_placeholder: 'Сообщение…', rt_new_match: 'Новый матч', rt_open_chat: 'Открыть чат', rt_close: 'Закрыть',
+        typing_indicator: 'печатает...', ai_powered: '🤖 AI-ответы включены',
+        cat_music: '🎵 Музыка', cat_sport: '🏀 Спорт', cat_travel: '✈️ Путешествия', cat_gaming: '🎮 Гейминг',
+        cat_art: '🎨 Искусство', cat_cooking: '🍳 Готовка', cat_movies: '🎬 Кино', cat_tech: '💻 Технологии', cat_nature: '🍃 Природа'
+      },
+      kz: {
+        nav_search: 'Іздеу', nav_chats: 'Чаттар', nav_gifts: 'Сыйлықтар', nav_profile: 'Профиль',
+        stats: 'Статистика', views: 'Көрулер', likes: 'Ұнатқандар', ai: 'AI Score', verified: 'Верификация',
+        realtime: 'Real-time', simulate: 'Матч симуляциясы', all_cities: 'Барлық қалалар',
+        your_matches: 'Сіздің матчтар', gift_shop: 'Сыйлық дүкені', online: 'Қазір онлайн',
+        your_name: 'Атыңыз', your_city: 'Қалаңыз', choose_city: 'Қаланы таңдаңыз',
+        interests_label: 'Қызығушылықтар', upload_photo: 'Фото жүктеу', photo_hint: 'Таңдау үшін басыңыз',
+        save: 'Сақтау', verify: 'Профильді верификациялау', choose_gift: 'Сыйлық таңдаңыз',
+        toast_saved: 'Профиль сақталды', toast_verified: 'Профиль верификациядан өтті ✓',
+        toast_like: 'Лайк жіберілді ❤️', toast_skip: 'Өткізу', toast_super: 'Суперлайк ⭐',
+        toast_gift: 'Сыйлық жіберілді 🎁', toast_match: 'Жаңа матч! 💘',
+        chat_placeholder: 'Хабарлама…', rt_new_match: 'Жаңа матч', rt_open_chat: 'Чатты ашу', rt_close: 'Жабу',
+        typing_indicator: 'жазып жатыр...', ai_powered: '🤖 AI жауаптар қосулы',
+        cat_music: '🎵 Музыка', cat_sport: '🏀 Спорт', cat_travel: '✈️ Саяхат', cat_gaming: '🎮 Ойындар',
+        cat_art: '🎨 Өнер', cat_cooking: '🍳 Аспаздық', cat_movies: '🎬 Кино', cat_tech: '💻 Технология', cat_nature: '🍃 Табиғат'
+      }
+    };
+
+    const photoGradients = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
+    ];
+
+    const profileDatabase = [
+      { 
+        id: 101, 
+        name: 'Тураш Али', 
+        age: 23, 
+        city: 'Алматы', 
+        emoji: '🦁', 
+        image: 'https://raw.githubusercontent.com/dreamnewly/dating-bot-photos-demo/main/image%20(2).png', 
+        bio: '💡 AI-совместимость теперь рассчитывается по вашим общим интересам! Выберите свои интересы в профиле. 😎', 
+        interests: ['🏀 Спорт', '✈️ Саяхат', '💼 Бизнес'], 
+        verified: true, 
+        online: true, 
+        aiScore: 98, 
+        photos: [0] 
+      },
+      { 
+        id: 102, 
+        name: 'Мирас Нуркасым', 
+        age: 24, 
+        city: 'Астана', 
+        emoji: '😎',
+        image: 'https://raw.githubusercontent.com/dreamnewly/dating-bot-photos-demo/main/photo_5192685967507132795_x.png', 
+        bio: 'Люблю IT, стартапы и вкусный кофе. Ищу ту самую.', 
+        interests: ['💻 Технологии', '☕ Кофе', '🎮 Гейминг'], 
+        verified: true, 
+        online: false, 
+        aiScore: 95, 
+        photos: [1] 
+      },
+      { 
+        id: 103, 
+        name: 'Оразбаков Темирлан', 
+        age: 22, 
+        city: 'Алматы', 
+        emoji: '🔥',
+        image: 'https://raw.githubusercontent.com/dreamnewly/dating-bot-photos-demo/main/photo_5440511241249473687_c.png', 
+        bio: 'Всегда на позитиве. Люблю горы и активный отдых 🏔️', 
+        interests: ['🏔️ Горы', '🎵 Музыка', '🚗 Авто'], 
+        verified: true, 
+        online: true, 
+        aiScore: 92, 
+        photos: [2] 
+      },
+      { 
+        id: 104, 
+        name: 'Казбекова Айгерим', 
+        age: 21, 
+        city: 'Алматы', 
+        emoji: '🌸',
+        image: 'https://raw.githubusercontent.com/dreamnewly/dating-bot-photos-demo/main/photo_5192685967507132809_x.png', 
+        bio: 'Нежная, но с характером. Люблю искусство и искренность ✨', 
+        interests: ['🎨 Искусство', '👗 Мода', '📚 Книги'], 
+        verified: true, 
+        online: true, 
+        aiScore: 99, 
+        photos: [3] 
+      },
+      { 
+        id: 105, 
+        name: 'Жания', 
+        age: 20, 
+        city: 'Шымкент', 
+        emoji: '💃',
+        image: 'https://raw.githubusercontent.com/dreamnewly/dating-bot-photos-demo/main/photo_5192685967507132803_m.png', 
+        bio: 'Улыбайся, тебе это идет! Люблю танцы и лето ☀️', 
+        interests: ['💃 Танцы', '🎬 Кино', '🍳 Готовка'], 
+        verified: false, 
+        online: true, 
+        aiScore: 89, 
+        photos: [4] 
+      }
+    ];
+
+    const gifts = [
+      { nameKz: 'Раушан', nameRu: 'Роза', emoji: '🌹', cost: 10 },
+      { nameKz: 'Шоколад', nameRu: 'Шоколад', emoji: '🍫', cost: 15 },
+      { nameKz: 'Тәж', nameRu: 'Корона', emoji: '👑', cost: 50 },
+      { nameKz: 'Гауһар', nameRu: 'Бриллиант', emoji: '💎', cost: 100 },
+      { nameKz: 'Кофе', nameRu: 'Кофе', emoji: '☕', cost: 5 },
+      { nameKz: 'Ракета', nameRu: 'Ракета', emoji: '🚀', cost: 200 }
+    ];
+
+    const interestCategories = ['cat_music', 'cat_sport', 'cat_travel', 'cat_gaming', 'cat_art', 'cat_cooking', 'cat_movies', 'cat_tech', 'cat_nature'];
+
+    // Фолбек чат-паттерны (если OpenAI ключ не работает)
+    const chatPatterns = {
+      ru: [
+        { keywords: ['привет', 'здравствуй'], answers: ['Привет! 👋', 'Салют!', 'Как дела?'] },
+        { keywords: ['как дела', 'как ты'], answers: ['Супер! А у тебя?', 'Все отлично, спасибо!'] },
+        { keywords: ['чем занимаешься'], answers: ['Смотрю сериал. А ты?', 'Отдыхаю'] },
+        { keywords: ['пока'], answers: ['До встречи!', 'Пока-пока!'] }
+      ],
+      kz: [
+        { keywords: ['сәлем', 'салам'], answers: ['Сәлем! 👋', 'Қалың қалай?', 'Сәлем бердік!'] },
+        { keywords: ['қалайсың'], answers: ['Жақсы! Өзің ше?', 'Шүкір, жаман емес'] },
+        { keywords: ['не істеп'], answers: ['Демалып отырмын.', 'Музыка тыңдап'] },
+        { keywords: ['сау бол'], answers: ['Көріскенше!', 'Сау бол!'] }
+      ]
+    };
+
+    let allProfiles = [...profileDatabase];
+    let filteredProfiles = [...allProfiles];
+    let idx = 0;
+    let photoIdx = 0;
+    let starBalance = 1000;
+    let views = 0;
+    let likes = 0;
+    let matches = [];
+    let chats = {}; 
+    let isVerified = false;
+    let giftTarget = null;
+    let currentChatId = null;
+    
+    // AI Bot Configuration
+    const OPENAI_MODEL = 'gpt-3.5-turbo';
+    let isAITyping = false;
+    let unreadCount = 0;
+    let lang = 'kz';
+    let myInterests = [];
+    let myPhoto = null;
+
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function save() {
+      localStorage.setItem('dhp_starBalance', String(starBalance));
+      localStorage.setItem('dhp_views', String(views));
+      localStorage.setItem('dhp_likes', String(likes));
+      localStorage.setItem('dhp_matches', JSON.stringify(matches));
+      localStorage.setItem('dhp_chats', JSON.stringify(chats));
+      localStorage.setItem('dhp_verified', String(isVerified));
+      localStorage.setItem('dhp_lang', String(lang));
+    }
+
+    function load() {
+      starBalance = parseInt(localStorage.getItem('dhp_starBalance') || '100', 10);
+      views = parseInt(localStorage.getItem('dhp_views') || '0', 10);
+      likes = parseInt(localStorage.getItem('dhp_likes') || '0', 10);
+      matches = JSON.parse(localStorage.getItem('dhp_matches') || '[]');
+      chats = JSON.parse(localStorage.getItem('dhp_chats') || '{}');
+      isVerified = localStorage.getItem('dhp_verified') === 'true';
+      lang = localStorage.getItem('dhp_lang') || 'kz';
+    }
+
+    function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+    function t(key) { return i18n[lang]?.[key] ?? i18n.ru[key] ?? key; }
+    function toast(icon, text, ms = 2200) { $('#toastIcon').textContent = icon; $('#toastText').textContent = text; const el = $('#toast'); el.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), ms); }
+
+    function calculateCompatibility(profile) {
+      if (!myInterests || myInterests.length === 0) return profile.aiScore || 75;
+      const myInterestLabels = myInterests.map(cat => t(cat));
+      let commonInterests = 0;
+      profile.interests.forEach(interest => { if (myInterestLabels.includes(interest)) commonInterests++; });
+      const maxInterests = Math.max(myInterests.length, profile.interests.length);
+      if (maxInterests === 0) return profile.aiScore || 75;
+      let compatibilityScore = Math.round((commonInterests / maxInterests) * 100);
+      if (commonInterests > 0) compatibilityScore = Math.max(50, compatibilityScore);
+      if (profile.verified) compatibilityScore = Math.min(100, compatibilityScore + 5);
+      if (profile.online) compatibilityScore = Math.min(100, compatibilityScore + 3);
+      return Math.max(30, Math.min(100, compatibilityScore));
+    }
+
+    function updateBadges() {
+      $('#starBalance').textContent = starBalance; $('#matchCount').textContent = matches.length;
+      $('#views').textContent = views; $('#likes').textContent = likes;
+      $('#verifiedSmall').textContent = isVerified ? '✓' : '—';
+      const badge = $('#unreadBadge');
+      if (unreadCount > 0) { badge.style.display = ''; badge.textContent = String(unreadCount); } else { badge.style.display = 'none'; }
+    }
+
+    function applyI18n() {
+      document.documentElement.setAttribute('data-lang', lang);
+      $$('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); el.textContent = t(key); });
+      $('#chatInput').placeholder = t('chat_placeholder');
+      renderInterests();
+    }
+
+    function toggleTheme() { const root = document.documentElement; const isDark = root.getAttribute('data-theme') === 'dark'; root.setAttribute('data-theme', isDark ? 'light' : 'dark'); localStorage.setItem('dhp_theme', isDark ? 'light' : 'dark'); }
+    function toggleLang() { lang = (lang === 'kz') ? 'ru' : 'kz'; applyI18n(); renderGifts(); renderMatches(); save(); toast('🌐', lang === 'kz' ? 'Қазақша' : 'Русский'); }
+
+    function showSection(id) { $$('.section').forEach(s => s.classList.remove('active')); $('#' + id).classList.add('active'); $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === id)); if (id === 'matches') { unreadCount = 0; updateBadges(); } }
+
+    function currentProfile() { return filteredProfiles.length ? filteredProfiles[idx % filteredProfiles.length] : null; }
+    function renderDots(count) { const wrap = $('#photoDots'); wrap.innerHTML = ''; for (let i = 0; i < count; i++) { const d = document.createElement('div'); d.className = 'dot' + (i === photoIdx ? ' active' : ''); wrap.appendChild(d); } }
+    
+    function displayProfile() {
+      const p = currentProfile();
+      if (!p) return;
+      views++;
+      const photoEl = $('#photo');
+      const emojiEl = $('#photoEmoji');
+      if (p.image && p.image.startsWith('http')) {
+        const tempImg = new Image();
+        tempImg.onload = function() {
+          photoEl.style.background = `url("${p.image}") center/cover no-repeat`;
+          emojiEl.style.display = 'none';
+        };
+        tempImg.onerror = function() {
+          photoEl.style.background = photoGradients[p.photos[photoIdx] ?? 0];
+          emojiEl.style.display = 'block';
+          emojiEl.textContent = p.emoji;
+        };
+        tempImg.src = p.image;
+        photoEl.style.background = photoGradients[p.photos[photoIdx] ?? 0];
+        emojiEl.style.display = 'block';
+        emojiEl.textContent = p.emoji;
+      } else {
+        photoEl.style.background = photoGradients[p.photos[photoIdx] ?? 0];
+        emojiEl.style.display = 'block';
+        emojiEl.textContent = p.emoji;
+      }
+      $('#pName').textContent = `${p.name}, ${p.age}`;
+      $('#pMeta').innerHTML = `📍 ${p.city} • ${p.distance || 2}км`;
+      $('#pBio').textContent = p.bio;
+      const dynamicScore = calculateCompatibility(p);
+      $('#aiScore').textContent = dynamicScore; 
+      $('#aiScoreSmall').textContent = dynamicScore + '%';
+      $('#verifiedBadge').style.display = p.verified ? '' : 'none';
+      $('#onlineBadge').style.display = p.online ? '' : 'none';
+      $('#pTags').innerHTML = '';
+      p.interests.forEach(x => { const el = document.createElement('div'); el.className = 'tag'; el.textContent = x; $('#pTags').appendChild(el); });
+      renderDots(p.photos.length); updateBadges(); save();
+    }
+
+    function nextPhoto() { const p = currentProfile(); if (!p) return; photoIdx = (photoIdx + 1) % p.photos.length; displayProfile(); }
+    function prevPhoto() { const p = currentProfile(); if (!p) return; photoIdx = (photoIdx - 1 + p.photos.length) % p.photos.length; displayProfile(); }
+    function skip() { toast('👋', t('toast_skip')); idx++; photoIdx = 0; displayProfile(); }
+    
+    function superLike() {
+      if (starBalance < 5) { toast('⚠️', 'Not enough ⭐'); return; }
+      starBalance -= 5; likes++; toast('⭐', t('toast_super'));
+      tryMatch(true); idx++; photoIdx = 0; displayProfile();
+    }
+    function like() { likes++; toast('❤️', t('toast_like')); tryMatch(false); idx++; photoIdx = 0; displayProfile(); }
+    function filterByCity() { const city = $('#citySelect').value; filteredProfiles = city ? allProfiles.filter(p => p.city === city) : [...allProfiles]; idx = 0; photoIdx = 0; displayProfile(); toast('🔎', city ? `City: ${city}` : t('all_cities')); }
+
+    function tryMatch(isSuper) {
+      const p = currentProfile(); if (!p) return;
+      const chance = Math.min(0.92, (isSuper ? 0.72 : 0.38) + (p.aiScore / 250));
+      if (Math.random() <= chance) createMatch(p);
+    }
+
+    function createMatch(profile) {
+      if (matches.some(m => m.id === profile.id)) return;
+      const match = { 
+        id: profile.id, 
+        name: profile.name, 
+        emoji: profile.emoji, 
+        image: profile.image, 
+        city: profile.city, 
+        aiScore: calculateCompatibility(profile), 
+        ts: Date.now() 
+      };
+      matches.unshift(match);
+      chats[String(match.id)] = chats[String(match.id)] || [{ me: false, text: 'Сәлем! 👋', ts: Date.now() }];
+      unreadCount++; updateBadges(); renderMatches(); save(); toast('💘', t('toast_match')); pushRealtimeCard(match);
+    }
+
+    function pushRealtimeCard(match) {
+      const bell = $('#rtBell');
+      const card = document.createElement('div'); card.className = 'rt-card';
+      card.innerHTML = `<div class="rt-top"><div><div class="rt-title">${t('rt_new_match')} 💘</div><div class="rt-sub">${match.emoji} ${match.name}</div></div><button class="icon-btn" style="width:40px;height:40px;" onclick="this.closest('.rt-card').remove()">✕</button></div><div class="rt-actions"><button class="btn btn-primary" style="flex:1" onclick="openChat(${match.id}); this.closest('.rt-card').remove();">💬 ${t('rt_open_chat')}</button></div>`;
+      bell.appendChild(card); setTimeout(() => { if (card.isConnected) card.remove(); }, 9000);
+    }
+    function simulateRealtimeMatch() { const pool = allProfiles.filter(p => !matches.some(m => m.id === p.id)); if (!pool.length) return; createMatch(pool[Math.floor(Math.random() * pool.length)]); }
+
+    function renderMatches() {
+      const list = $('#matchesList'); list.innerHTML = '';
+      if (!matches.length) { list.innerHTML = '<div style="padding:10px; opacity:0.6">Нет матчей</div>'; return; }
+      matches.forEach(m => {
+        const row = document.createElement('div'); row.className = 'match'; row.onclick = () => openChat(m.id);
+        let avatarStyle = `background:${photoGradients[m.id % photoGradients.length]}`;
+        let avatarContent = m.emoji;
+        if (m.image && m.image.startsWith('http')) {
+             avatarStyle = `background:url('${m.image}') center/cover no-repeat`;
+             avatarContent = '';
+        }
+        const profile = allProfiles.find(p => p.id === m.id);
+        const displayScore = profile ? calculateCompatibility(profile) : m.aiScore;
+        row.innerHTML = `<div class="avatar" style="${avatarStyle}">${avatarContent}</div><div class="match-info"><p class="match-name">${m.name}</p><div class="match-sub">📍 ${m.city}</div></div><div class="compat">${displayScore}%</div>`;
+        list.appendChild(row);
+      });
+    }
+
+    function openChat(matchId) {
+      const m = matches.find(x => x.id === matchId); if (!m) return;
+      currentChatId = String(matchId);
+      const profile = allProfiles.find(p => p.id === m.id);
+      const displayScore = profile ? calculateCompatibility(profile) : m.aiScore;
+      $('#chatTitle').textContent = `💬 ${m.name}`; $('#chatSubtitle').textContent = `${m.emoji} ${m.city} • ${displayScore}%`;
+      renderChat(); openModal('chatModal'); unreadCount = Math.max(0, unreadCount - 1); updateBadges();
+    }
+
+    function renderChat() {
+      const log = $('#chatLog'); log.innerHTML = '';
+      const msgs = chats[currentChatId] || [];
+      msgs.forEach(msg => { const el = document.createElement('div'); el.className = 'msg ' + (msg.me ? 'me' : 'other'); el.textContent = msg.text; log.appendChild(el); });
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function fetchOpenAIResponse(userMessage, matchProfile, chatHistory) {
+      // ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЙ ПРОКСИ-СЕРВЕР (без проблем с CORS!)
+      const PROXY_URL = 'http://localhost:3000/api/chat';
+
+      try {
+        // Определяем язык для ответа
+        const currentLang = lang === 'kz' ? 'казахском' : 'русском';
+        const languageInstruction = lang === 'kz' 
+          ? 'Жауапты ТӘЕК казақ тілінде беріңіз. Қазақша жазыңыз!' 
+          : 'Отвечай ТОЛЬКО на русском языке!';
+        
+        // Формируем контекст из истории чата
+        const messages = [
+          { 
+            role: "system", 
+            content: `Ты ${matchProfile.name}, ${matchProfile.age} лет из ${matchProfile.city}. ${languageInstruction}
+            
+Твоя биография: ${matchProfile.bio || 'Обычный человек, люблю общаться'}
+
+Твои интересы: ${(matchProfile.interests || []).join(', ')}
+
+Веди непринужденную беседу в стиле знакомства через приложение для свиданий. Будь дружелюбным, интересным и кокетливым. Используй эмодзи умеренно. Задавай встречные вопросы, чтобы поддерживать диалог.
+
+ВАЖНО: Отвечай на ${currentLang} языке!`
+          }
+        ];
+
+        // Добавляем историю чата для контекста (последние 10 сообщений)
+        if (chatHistory && chatHistory.length > 0) {
+          const recentHistory = chatHistory.slice(-10);
+          recentHistory.forEach(msg => {
+            messages.push({
+              role: msg.me ? "user" : "assistant",
+              content: msg.text
+            });
+          });
+        }
+
+        // Добавляем текущее сообщение пользователя
+        messages.push({ role: "user", content: userMessage });
+
+        // Запрос к ПРОКСИ-СЕРВЕРУ (не напрямую к OpenAI!)
+        const response = await fetch(PROXY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: OPENAI_MODEL,
+            messages: messages,
+            temperature: 0.8,
+            max_tokens: 150
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+          console.error("API Error:", data.error);
+          throw new Error(data.error);
+        }
+        
+        if (!data.choices || data.choices.length === 0) {
+          throw new Error("Нет ответа от API");
+        }
+        
+        return data.choices[0].message.content;
+
+      } catch (error) {
+        console.error("AI Error:", error);
+        return getFallbackReply(userMessage);
+      }
+    }
+
+    function getFallbackReply(text) {
+      const lower = text.toLowerCase();
+      const currentLang = lang === 'kz' ? 'kz' : 'ru'; 
+      const patterns = chatPatterns[currentLang];
+      for (let p of patterns) {
+        if (p.keywords.some(k => lower.includes(k))) return p.answers[Math.floor(Math.random() * p.answers.length)];
+      }
+      return currentLang === 'kz' ? 'Қызық екен... 😄' : 'Интересно... расскажи еще 😄';
+    }
+
+    async function sendMessage() {
+      if (!currentChatId) return;
+      const input = $('#chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      // 1. Сохраняем и показываем сообщение пользователя
+      chats[currentChatId] = chats[currentChatId] || [];
+      const history = [...chats[currentChatId]]; // Копия истории до нового сообщения
+      chats[currentChatId].push({ me: true, text, ts: Date.now() });
+      input.value = '';
+      renderChat();
+      save();
+
+      // 2. Показываем индикатор печати
+      const indicator = $('#typingIndicator');
+      if (indicator) indicator.style.display = 'block';
+      const log = $('#chatLog');
+      log.scrollTop = log.scrollHeight;
+
+      // 3. Получаем данные профиля для контекста
+      const profile = allProfiles.find(p => String(p.id) === currentChatId) || {};
+      
+      // 4. Запрос к AI (с искусственной задержкой для реализма)
+      const aiReply = await fetchOpenAIResponse(text, profile, history);
+      
+      // Скрываем индикатор
+      if (indicator) indicator.style.display = 'none';
+
+      // 5. Сохраняем ответ бота
+      chats[currentChatId].push({ me: false, text: aiReply, ts: Date.now() });
+      renderChat();
+      save();
+    }
+
+    function renderGifts() {
+      const grid = $('#giftsGrid'); const modalGrid = $('#giftModalGrid'); grid.innerHTML = ''; modalGrid.innerHTML = '';
+      gifts.forEach((g, i) => {
+        const name = lang === 'kz' ? g.nameKz : g.nameRu;
+        const card = document.createElement('div'); card.className = 'gift';
+        card.innerHTML = `<span class="gift-emoji">${g.emoji}</span><p class="gift-name">${name}</p><span class="gift-cost">⭐ ${g.cost}</span>`;
+        card.onclick = () => { giftTarget = currentProfile(); openGiftModal(); };
+        grid.appendChild(card);
+        const card2 = card.cloneNode(true); card2.onclick = () => buyGift(i); modalGrid.appendChild(card2);
+      });
+    }
+
+    function openGiftModal() { giftTarget = giftTarget || currentProfile(); if (!giftTarget) return; openModal('giftModal'); }
+    function buyGift(giftIndex) {
+      const g = gifts[giftIndex]; if (!giftTarget) return;
+      if (starBalance < g.cost) { toast('⚠️', 'Not enough ⭐'); return; }
+      starBalance -= g.cost; updateBadges(); save(); closeModal('giftModal'); triggerGiftAnimation(g.emoji); toast('🎁', t('toast_gift'));
+      if (Math.random() < 0.55) createMatch(giftTarget);
+    }
+
+    function triggerGiftAnimation(emoji) {
+      const container = document.createElement('div');
+      container.className = 'gift-anim-container';
+      
+      const main = document.createElement('div');
+      main.textContent = emoji;
+      main.className = 'gift-anim-main';
+      container.appendChild(main);
+      
+      for (let i = 0; i < 24; i++) {
+        const p = document.createElement('div');
+        p.textContent = emoji; 
+        p.className = 'gift-specific-item';
+        const angle = (Math.random() * Math.PI * 2);
+        const dist = 100 + Math.random() * 250;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist;
+        const rot = Math.random() * 360;
+        p.style.setProperty('--tx', `${tx}px`);
+        p.style.setProperty('--ty', `${ty}px`);
+        p.style.setProperty('--r', `${rot}deg`);
+        p.style.animationDelay = (Math.random() * 0.3) + 's';
+        container.appendChild(p);
+      }
+
+      const hearts = ['💕', '💖', '💗', '💓', '💝', '❤️'];
+      for (let i = 0; i < 12; i++) {
+        const heart = document.createElement('div');
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.className = 'gift-heart';
+        const angle = (i / 12) * Math.PI * 2;
+        const dist = 180 + Math.random() * 100;
+        heart.style.setProperty('--hx', `${Math.cos(angle) * dist}px`);
+        heart.style.setProperty('--hy', `${Math.sin(angle) * dist}px`);
+        heart.style.setProperty('--hr', `${Math.random() * 720 - 360}deg`);
+        heart.style.animationDelay = (i * 0.05) + 's';
+        container.appendChild(heart);
+      }
+
+      for (let i = 0; i < 6; i++) {
+        const star = document.createElement('div');
+        star.textContent = '✨';
+        star.className = 'gift-star';
+        star.style.left = (40 + Math.random() * 20) + '%';
+        star.style.top = (40 + Math.random() * 20) + '%';
+        star.style.animationDelay = (i * 0.1) + 's';
+        container.appendChild(star);
+      }
+
+      const ringColors = ['rgba(255, 71, 87, 0.5)', 'rgba(83, 82, 237, 0.5)'];
+      for (let i = 0; i < 3; i++) {
+        const ring = document.createElement('div');
+        ring.className = 'gift-ring';
+        ring.style.borderColor = ringColors[i % 2];
+        ring.style.animationDelay = (i * 0.15) + 's';
+        container.appendChild(ring);
+      }
+
+      document.body.appendChild(container);
+      setTimeout(() => { if (container.isConnected) container.remove(); }, 3500);
+    }
+    
+    function renderInterests() {
+      const container = $('#interestContainer'); container.innerHTML = '';
+      interestCategories.forEach(key => {
+        const label = t(key); const el = document.createElement('div'); el.className = 'interest-tag' + (myInterests.includes(key) ? ' selected' : '');
+        el.textContent = label; el.onclick = () => toggleInterest(key); container.appendChild(el);
+      });
+    }
+    function toggleInterest(key) { if (myInterests.includes(key)) myInterests = myInterests.filter(k => k !== key); else myInterests.push(key); renderInterests(); }
+    
+    function handleFileSelect(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader(); reader.onload = function(evt) { myPhoto = evt.target.result; updatePhotoPreview(myPhoto); toast('📷', 'OK'); }; reader.readAsDataURL(file);
+    }
+    function updatePhotoPreview(src) {
+      const preview = $('#photoPreview'); const meAvatar = $('#meAvatar');
+      if (src) { preview.style.display = 'block'; preview.style.backgroundImage = `url(${src})`; meAvatar.textContent = ''; meAvatar.style.backgroundImage = `url(${src})`; }
+      else { preview.style.display = 'none'; meAvatar.textContent = '👤'; meAvatar.style.backgroundImage = 'none'; }
+    }
+
+    function verifyProfile() { isVerified = true; updateMe(); updateBadges(); save(); toast('📸', t('toast_verified')); }
+    function updateMe() { const n = $('#inpName').value.trim() || 'User'; const c = $('#inpCity').value || '—'; $('#meName').textContent = n; $('#meCity').textContent = c; }
+    
+    function renderOnline() {
+      const list = $('#onlineList'); list.innerHTML = '';
+      
+      const onlineUsers = allProfiles.filter(p => p.online).slice(0, 6);
+      
+      onlineUsers.forEach(p => {
+        const el = document.createElement('div'); el.className = 'mini';
+        el.onclick = () => {
+          const inFiltered = filteredProfiles.findIndex(x => x.id === p.id);
+          if (inFiltered >= 0) idx = inFiltered; else { filteredProfiles = [...allProfiles]; idx = allProfiles.findIndex(x => x.id === p.id); $('#citySelect').value = ''; }
+          photoIdx = 0; showSection('browse'); displayProfile(); toast('🟢', `${p.name} online`);
+        };
+        
+        let avatarStyle = '';
+        let avatarContent = p.emoji;
+        
+        if (p.image && p.image.startsWith('http')) {
+          avatarStyle = `background-image: url('${p.image}'); background-size: cover; background-position: center;`;
+          avatarContent = '';
+        } else {
+          avatarStyle = `background: ${photoGradients[p.id % photoGradients.length]};`;
+        }
+        
+        el.innerHTML = `
+          <div class="avatar" style="${avatarStyle}">
+            ${avatarContent}
+            <div class="online-dot"></div>
+          </div>
+          <div style="min-width:0;">
+            <div class="mname" style="font-weight:700;">${p.name}</div>
+            <div class="mmeta" style="font-size:12px; color:var(--text-sub);">📍 ${p.city}</div>
+          </div>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    function openModal(id) { $('#' + id).classList.add('active'); }
+    function closeModal(id) { $('#' + id).classList.remove('active'); }
+    function modalBackdropClose(e, id) { if (e.target.id === id) closeModal(id); }
+
+    function init() {
+      const theme = localStorage.getItem('dhp_theme') || 'light'; document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-lang', lang);
+      shuffle(allProfiles); filteredProfiles = [...allProfiles];
+      renderDots(4); 
+      renderOnline();
+      renderGifts(); renderMatches(); displayProfile();
+      load(); updateMe(); updateBadges(); applyI18n();
+      $('#verifiedSmall').textContent = isVerified ? '✓' : '—';
+      $('#profileForm').addEventListener('submit', (e) => { e.preventDefault(); updateMe(); save(); toast('💾', t('toast_saved')); });
+      $('#chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+    }
+
+    window.toggleTheme = toggleTheme; window.toggleLang = toggleLang; window.showSection = showSection; window.filterByCity = filterByCity;
+    window.nextPhoto = nextPhoto; window.prevPhoto = prevPhoto; window.like = like; window.skip = skip; window.superLike = superLike;
+    window.openGiftModal = openGiftModal; window.closeModal = closeModal; window.modalBackdropClose = modalBackdropClose; window.buyGift = buyGift;
+    window.openChat = openChat; window.sendMessage = sendMessage; window.verifyProfile = verifyProfile; window.simulateRealtimeMatch = simulateRealtimeMatch;
+    window.handleFileSelect = handleFileSelect; window.toggleInterest = toggleInterest;
+
+    init();
+  </script>
+</body>
+</html>
