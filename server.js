@@ -1,4 +1,3 @@
-// Простой прокси-сервер для OpenAI API
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -6,25 +5,33 @@ const fetch = require('node-fetch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// ⚠️ API ключ теперь в файле .env (безопаснее!)
-// Скопируйте .env.example в .env и добавьте свой ключ
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY || OPENAI_API_KEY === 'sk-proj-your-api-key-here') {
-  console.error('❌ ОШИБКА: API ключ не настроен!');
-  console.error('📝 Создайте файл .env и добавьте: OPENAI_API_KEY=ваш-ключ');
+  console.error('❌ API ключ не настроен!');
   process.exit(1);
 }
 
-app.use(cors());
+// ✅ CORS ДЛЯ GITHUB PAGES (ЗАМЕНИЛ cors())
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://dreamnewly.github.io');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
 app.use(express.json());
 
-// Эндпоинт для чата
 app.post('/api/chat', async (req, res) => {
   try {
     const { messages, model, temperature, max_tokens } = req.body;
-
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -53,6 +60,5 @@ app.post('/api/chat', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Прокси-сервер запущен на http://localhost:${PORT}`);
-  console.log(`📡 API доступен на http://localhost:${PORT}/api/chat`);
+  console.log(`🚀 Сервер на http://localhost:${PORT}`);
 });
