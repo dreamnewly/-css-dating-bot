@@ -839,30 +839,10 @@
     }
 
     async function fetchOpenAIResponse(userMessage, matchProfile, chatHistory) {
-<<<<<<< HEAD
-  const PROXY_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://css-dating-bot-openaiapikey.up.railway.app/api/chat');
-
-  
-  try {
-    // ТВОЙ КОД С СИСТЕМНЫМ ПРОМПТОМ (оставь как есть)
-    const currentLang = lang === 'kz' ? 'казахском' : 'русском';
-    const languageInstruction = lang === 'kz' 
-      ? 'Жауапты ТӘЕК казақ тілінде беріңіз!' : 'Отвечай ТОЛЬКО на русском!';
-    
-    const messages = [{ role: "system", content: `Ты ${matchProfile.name}...` }];
-    
-    // История чата...
-    if (chatHistory) chatHistory.slice(-10).forEach(msg => {
-      messages.push({ role: msg.me ? "user" : "assistant", content: msg.text });
-    });
-    
-    messages.push({ role: "user", content: userMessage });
-=======
-      /async function fetchOpenAIResponse(userMessage, matchProfile, chatHistory) {
-  // ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЙ ПРОКСИ-СЕРВЕР (без проблем с CORS!)
+  // ✅ CORS ПРОКСИ (4 строки фикса)
   const PROXY_URL = 'https://api.allorigins.win/get?url=' + 
     encodeURIComponent('https://css-dating-bot-openaiapikey.up.railway.app/api/chat');
-
+  
   try {
     // Определяем язык для ответа
     const currentLang = lang === 'kz' ? 'казахском' : 'русском';
@@ -877,27 +857,9 @@
         content: `Ты ${matchProfile.name}, ${matchProfile.age} лет из ${matchProfile.city}. ${languageInstruction}
         
 Твоя биография: ${matchProfile.bio || 'Обычный человек, люблю общаться'}
->>>>>>> 9b1bd31c81232fd0ecbe95c392ca4c13d72a17cc
 
-    const proxyResponse = await fetch(PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, model: 'gpt-3.5-turbo', temperature: 0.8, max_tokens: 150 })
-    });
-    
-    const proxyData = await proxyResponse.json();
-    const data = JSON.parse(proxyData.contents);
-    
-    return data.choices[0].message.content;
-    
-  } catch (error) {
-    console.error('AI Error:', error);
-    return '😊 Привет! Как дела?';
-  }
-}
+Твои интересы: ${(matchProfile.interests || []).join(', ')}
 
-<<<<<<< HEAD
-=======
 Веди непринужденную беседу в стиле знакомства через приложение для свиданий. Будь дружелюбным, интересным и кокетливым. Используй эмодзи умеренно. Задавай встречные вопросы, чтобы поддерживать диалог.
 
 ВАЖНО: Отвечай на ${currentLang} языке!`
@@ -918,9 +880,12 @@
     // Добавляем сообщение пользователя
     messages.push({ role: "user", content: userMessage });
 
+    // ✅ ОТПРАВЛЯЕМ ЧЕРЕЗ CORS ПРОКСИ
     const proxyResponse = await fetch(PROXY_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         messages: messages,
         model: 'gpt-3.5-turbo',
@@ -932,13 +897,24 @@
     const proxyData = await proxyResponse.json();
     const data = JSON.parse(proxyData.contents);
 
+    if (data.error) {
+      console.error('API Error:', data.error);
+      throw new Error(data.error.message);
+    }
+
+    if (!data.choices || !data.choices[0]) {
+      throw new Error('Нет ответа от AI');
+    }
+
     return data.choices[0].message.content;
 
   } catch (error) {
     console.error('AI Error:', error);
+    // Fallback ответы если сервер не работает
     return getFallbackReply(userMessage);
   }
 }
+
 
         // Добавляем текущее сообщение пользователя
         messages.push({ role: "user", content: userMessage });
