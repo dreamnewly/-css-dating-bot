@@ -12,7 +12,7 @@
 
   <style>
     /* ==========================================================
-       CSS STYLES (Остались без изменений)
+       CSS STYLES
        ========================================================== */
     *, *::before, *::after { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -494,9 +494,6 @@
     // JS LOGIC
     // ==========================================================
 
-    // ✅ API ключ теперь НА СЕРВЕРЕ (server.js), а не в браузере!
-    // Это безопаснее - ключ не виден пользователям 
-
     const i18n = {
       ru: {
         nav_search: 'Поиск', nav_chats: 'Чаты', nav_gifts: 'Подарки', nav_profile: 'Профиль',
@@ -622,7 +619,7 @@
 
     const interestCategories = ['cat_music', 'cat_sport', 'cat_travel', 'cat_gaming', 'cat_art', 'cat_cooking', 'cat_movies', 'cat_tech', 'cat_nature'];
 
-    // Фолбек чат-паттерны (если OpenAI ключ не работает)
+    // Фолбек чат-паттерны (если сервер не отвечает)
     const chatPatterns = {
       ru: [
         { keywords: ['привет', 'здравствуй'], answers: ['Привет! 👋', 'Салют!', 'Как дела?'] },
@@ -838,120 +835,70 @@
       log.scrollTop = log.scrollHeight;
     }
 
+    // ==========================================================
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ FETCH (БЕЗ КОНФЛИКТОВ)
+    // ==========================================================
     async function fetchOpenAIResponse(userMessage, matchProfile, chatHistory) {
-  // ✅ CORS ПРОКСИ (4 строки фикса)
-  const PROXY_URL = 'https://api.allorigins.win/get?url=' + 
-    encodeURIComponent('https://css-dating-bot-openaiapikey.up.railway.app/api/chat');
-  
-  try {
-    // Определяем язык для ответа
-    const currentLang = lang === 'kz' ? 'казахском' : 'русском';
-    const languageInstruction = lang === 'kz' 
-      ? 'Жауапты ТӘЕК казақ тілінде беріңіз. Қазақша жазыңыз!' 
-      : 'Отвечай ТОЛЬКО на русском языке!';
-    
-    // Формируем контекст из истории чата
-    const messages = [
-      { 
-        role: "system", 
-        content: `Ты ${matchProfile.name}, ${matchProfile.age} лет из ${matchProfile.city}. ${languageInstruction}
-        
-Твоя биография: ${matchProfile.bio || 'Обычный человек, люблю общаться'}
+      // Прямой адрес твоего сервера на Railway
+      const API_URL = 'https://css-dating-bot-openaiapikey.up.railway.app/api/chat';
 
-Твои интересы: ${(matchProfile.interests || []).join(', ')}
+      try {
+        // Определяем язык для системной инструкции
+        const currentLang = lang === 'kz' ? 'казахском' : 'русском';
+        const languageInstruction = lang === 'kz' 
+          ? 'Жауапты ТЕК қазақ тілінде беріңіз. Қазақша сөйле!' 
+          : 'Отвечай ТОЛЬКО на русском языке!';
 
-Веди непринужденную беседу в стиле знакомства через приложение для свиданий. Будь дружелюбным, интересным и кокетливым. Используй эмодзи умеренно. Задавай встречные вопросы, чтобы поддерживать диалог.
+        // Формируем историю сообщений для контекста
+        const messages = [
+          { 
+            role: "system", 
+            content: `Ты — ${matchProfile.name}, ${matchProfile.age} лет, из города ${matchProfile.city}.
+            Твои интересы: ${(matchProfile.interests || []).join(', ')}.
+            Твоя биография: ${matchProfile.bio}.
+            Инструкция: Будь дружелюбным, кокетливым, задавай вопросы. ${languageInstruction}` 
+          }
+        ];
 
-ВАЖНО: Отвечай на ${currentLang} языке!`
-      }
-    ];
-
-    // Добавляем историю чата для контекста (последние 10 сообщений)
-    if (chatHistory && chatHistory.length > 0) {
-      const recentHistory = chatHistory.slice(-10);
-      recentHistory.forEach(msg => {
-        messages.push({
-          role: msg.me ? "user" : "assistant",
-          content: msg.text
-        });
-      });
-    }
-
-    // Добавляем сообщение пользователя
-    messages.push({ role: "user", content: userMessage });
-
-    // ✅ ОТПРАВЛЯЕМ ЧЕРЕЗ CORS ПРОКСИ
-    const proxyResponse = await fetch(PROXY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        messages: messages,
-        model: 'gpt-3.5-turbo',
-        temperature: 0.8,
-        max_tokens: 150
-      })
-    });
-
-    const proxyData = await proxyResponse.json();
-    const data = JSON.parse(proxyData.contents);
-
-    if (data.error) {
-      console.error('API Error:', data.error);
-      throw new Error(data.error.message);
-    }
-
-    if (!data.choices || !data.choices[0]) {
-      throw new Error('Нет ответа от AI');
-    }
-
-    return data.choices[0].message.content;
-
-  } catch (error) {
-    console.error('AI Error:', error);
-    // Fallback ответы если сервер не работает
-    return getFallbackReply(userMessage);
-  }
-}
-
+        // Добавляем историю из чата (последние 10 сообщений)
+        if (chatHistory) {
+          chatHistory.slice(-10).forEach(msg => {
+            messages.push({ role: msg.me ? "user" : "assistant", content: msg.text });
+          });
+        }
 
         // Добавляем текущее сообщение пользователя
         messages.push({ role: "user", content: userMessage });
 
-        // Запрос к ПРОКСИ-СЕРВЕРУ (не напрямую к OpenAI!)
-        const response = await fetch(PROXY_URL, {
+        const response = await fetch(API_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: OPENAI_MODEL,
+            model: "gpt-3.5-turbo",
             messages: messages,
-            temperature: 0.8,
-            max_tokens: 150
+            temperature: 0.8
           })
         });
 
+        if (!response.ok) throw new Error('Ошибка сервера');
+
         const data = await response.json();
         
-        if (data.error) {
-          console.error("API Error:", data.error);
-          throw new Error(data.error);
+        // Проверяем структуру ответа (зависит от того, как настроен твой сервер.js)
+        // Обычно сервер возвращает то же, что и OpenAI
+        if (data.choices && data.choices.length > 0) {
+           return data.choices[0].message.content;
+        } else if (data.content) {
+           return data.content; // Если твой сервер сам достает контент
+        } else {
+           throw new Error('Пустой ответ от AI');
         }
-        
-        if (!data.choices || data.choices.length === 0) {
-          throw new Error("Нет ответа от API");
-        }
-        
-        return data.choices[0].message.content;
 
       } catch (error) {
         console.error("AI Error:", error);
-        return getFallbackReply(userMessage);
+        return getFallbackReply(userMessage); // Возврат заглушки при ошибке
       }
     }
->>>>>>> 9b1bd31c81232fd0ecbe95c392ca4c13d72a17cc
 
     function getFallbackReply(text) {
       const lower = text.toLowerCase();
